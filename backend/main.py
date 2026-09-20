@@ -30,6 +30,7 @@ import math
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator
 
 from agents import discover_sellers, get_seller_by_name
@@ -66,10 +67,23 @@ class RunRequest(BaseModel):
         extra = "forbid"
 
 
+ALLOWED_ORIGINS = [
+    "https://alltrustagent.us",
+    "https://agent-marketplace-1-cdcm.onrender.com",
+]
+
 app = FastAPI(
     title="AI Agent Marketplace Sandbox",
     version="0.2.0",
     description="A deterministic, sandbox-only marketplace workflow.",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+    allow_credentials=False,
 )
 
 
