@@ -173,7 +173,7 @@ export default function App() {
         </a>
         <div className="header-status">
           <span className="header-status__pulse" />
-          Sandbox network
+          Live ANS Verification
         </div>
       </header>
 

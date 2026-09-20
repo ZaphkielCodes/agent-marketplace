@@ -25,18 +25,23 @@ the service:
 
 ```text
 ANS_MODE=live
-GODADDY_PAT=<secret>
+GODADDY_KEY=<your-key>
+GODADDY_SECRET=<your-secret>
 GODADDY_ANS_BASE_URL=https://api.godaddy.com
 ```
 
-Live mode calls `GET /v1/ans/registered-agents/{agentId}` with PAT Bearer
-authentication. A seller is verified only when the response's `agentId` exactly
-matches the seller's `ans_id` and `lifecycle.status` is `ACTIVE`. Missing
-credentials, invalid responses, authentication failures, and network failures
-return an unverified result; live mode never falls back to simulated trust.
+Live mode calls `GET https://api.godaddy.com/v1/agents/{agentId}` with the
+`Authorization: sso-key {GODADDY_KEY}:{GODADDY_SECRET}` header. A seller is
+verified only when the response's `agentId` exactly matches the seller's
+`ans_id` and `agentStatus` is `ACTIVE`. Missing credentials, invalid responses,
+authentication failures, and network failures return an unverified result; live
+mode never falls back to simulated trust.
+
+`GameHubBot` is the registered live ANS seller. The other demo seller IDs may
+remain sandbox/demo identities.
 
 The included root `.env.example` lists the variable names only. Do not commit a
-real PAT or a populated `.env` file.
+real credential or a populated `.env` file.
 
 ## Run locally
 
