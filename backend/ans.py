@@ -52,10 +52,11 @@ def _live_failure(seller: SellerAgent, reason: str) -> dict[str, Any]:
 
 def _verify_live_ans(seller: SellerAgent) -> dict[str, Any]:
     """Verify a seller against the documented GoDaddy registered-agent API."""
-    pat = os.getenv("GODADDY_PAT", "").strip()
-    if not pat:
-        logger.warning("ANS identity rejected: GODADDY_PAT is missing")
-        return _live_failure(seller, "GODADDY_PAT is required when ANS_MODE=live.")
+    godaddy_key = os.getenv("GODADDY_KEY", "").strip()
+    godaddy_secret = os.getenv("GODADDY_SECRET", "").strip()
+    if not godaddy_key or not godaddy_secret:
+        logger.warning("ANS identity rejected: GODADDY_KEY and/or GODADDY_SECRET are missing")
+        return _live_failure(seller, "GODADDY_KEY and GODADDY_SECRET are required when ANS_MODE=live.")
 
     ans_id = seller.ans_id
     if not isinstance(ans_id, str) or not ans_id.strip():
@@ -64,9 +65,9 @@ def _verify_live_ans(seller: SellerAgent) -> dict[str, Any]:
 
     base_url = os.getenv("GODADDY_ANS_BASE_URL", DEFAULT_ANS_BASE_URL).strip()
     base_url = (base_url or DEFAULT_ANS_BASE_URL).rstrip("/")
-    url = f"{base_url}/v1/ans/registered-agents/{ans_id}"
+    url = f"{base_url}/v1/agents/{ans_id}"
     headers = {
-        "Authorization": f"Bearer {pat}",
+        "Authorization": f"sso-key {godaddy_key}:{godaddy_secret}",
         "Accept": "application/json",
     }
 
@@ -110,16 +111,15 @@ def _verify_live_ans(seller: SellerAgent) -> dict[str, Any]:
         return _live_failure(seller, "GoDaddy ANS response has an unexpected JSON shape.")
 
     returned_agent_id = payload.get("agentId")
-    lifecycle = payload.get("lifecycle")
-    lifecycle_status = lifecycle.get("status") if isinstance(lifecycle, dict) else None
-    if not isinstance(returned_agent_id, str) or not isinstance(lifecycle_status, str):
+    agent_status = payload.get("agentStatus")
+    if not isinstance(returned_agent_id, str) or not isinstance(agent_status, str):
         logger.warning("ANS identity rejected for seller=%s: missing identity fields", seller.name)
         return _live_failure(seller, "GoDaddy ANS response is missing required identity fields.")
     if returned_agent_id != ans_id:
         logger.warning("ANS identity rejected for seller=%s: agent ID mismatch", seller.name)
         return _live_failure(seller, "GoDaddy ANS agent ID does not match the seller ANS ID.")
-    if lifecycle_status != "ACTIVE":
-        logger.warning("ANS identity rejected for seller=%s: lifecycle status=%s", seller.name, lifecycle_status)
+    if agent_status != "ACTIVE":
+        logger.warning("ANS identity rejected for seller=%s: agentStatus=%s", seller.name, agent_status)
         return _live_failure(seller, "GoDaddy ANS agent is not ACTIVE.")
 
     logger.info("ANS lookup succeeded for seller=%s ans_id=%s", seller.name, ans_id)
@@ -130,8 +130,8 @@ def _verify_live_ans(seller: SellerAgent) -> dict[str, Any]:
         "status": "VERIFIED",
         "source": "godaddy_ans",
     }
-    if isinstance(payload.get("ansName"), str):
-        result["ans_name"] = payload["ansName"]
+    if isinstance(payload.get("agentDisplayName"), str):
+        result["agent_display_name"] = payload["agentDisplayName"]
     if isinstance(payload.get("agentHost"), str):
         result["agent_host"] = payload["agentHost"]
     return result

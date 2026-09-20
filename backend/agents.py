@@ -76,12 +76,12 @@ SELLER_CATALOG: list[SellerAgent] = [
         product="PS5",
         initial_price=475,
         verified=True,
-        ans_id="ans_demo_002",
+        ans_id="e42341fb-03b1-4f1e-83cf-0bd4ac53411c",
         capabilities=["PS5", "monitor"],
         buyer_offer_discount=15,
         counter_discount=10,
         negotiation_style="standard",
-        notes="Verified sandbox seller with a slightly better value than TechBot.",
+        notes="GoDaddy ANS-registered seller with a slightly better value than TechBot.",
     ),
     SellerAgent(
         name="BestDealBot",
@@ -164,3 +164,6 @@ def get_seller_by_name(name: str) -> SellerAgent | None:
         if seller.name.lower() == name.lower():
             return seller
     return None
+
+
+
