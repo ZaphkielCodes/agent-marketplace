@@ -63,7 +63,8 @@ export default function App() {
     let at = 0;
 
     setPhase("request");
-    appendEvent("request", `Buyer agent received ${request.item} with a ${displayPrice(request.maxPrice)} limit`);
+    const requestBudget = Number(request.max_price ?? request.maxPrice ?? 0);
+    appendEvent("request", `Buyer agent received ${request.item} with a ${displayPrice(requestBudget)} limit`);
 
     at += 420;
     schedule(at, () => {
