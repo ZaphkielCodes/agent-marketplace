@@ -152,8 +152,11 @@ def discover_sellers(item: str) -> list[SellerAgent]:
     This is where the real marketplace would later query a directory or registry
     of seller agents. For the sandbox, it is a simple in-memory catalog.
     """
-    target = (item or "").strip().lower()
-    return [seller for seller in SELLER_CATALOG if seller.product.strip().lower() == target]
+    return [
+        seller
+        for seller in SELLER_CATALOG
+        if seller.product.strip().lower() == item.strip().lower()
+    ]
 
 
 def get_seller_by_name(name: str) -> SellerAgent | None:
