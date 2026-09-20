@@ -29,10 +29,10 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, validator
 
-from agents import discover_sellers
+from agents import discover_sellers, get_seller_by_name
 from ans import verify_ans
 from negotiation import negotiate_with_seller
 
@@ -76,6 +76,21 @@ app = FastAPI(
 @app.get("/health")
 async def health() -> dict[str, Any]:
     return {"status": "ok", "service": "ai-agent-marketplace-sandbox"}
+
+
+@app.get("/agents/gamehub")
+async def gamehub_agent() -> dict[str, str]:
+    """Expose the existing GameHubBot seller's public availability details."""
+    seller = get_seller_by_name("GameHubBot")
+    if seller is None:
+        raise HTTPException(status_code=404, detail="GameHubBot is unavailable.")
+
+    return {
+        "agent": seller.name,
+        "product": seller.product,
+        "capability": seller.product.strip().lower(),
+        "status": "available",
+    }
 
 
 @app.post("/run")
